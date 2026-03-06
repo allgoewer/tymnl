@@ -31,7 +31,7 @@ mod state;
 type Error = Box<dyn std::error::Error + Send + Sync>;
 
 #[derive(Parser)]
-#[command(name = "tymnl", version = env!("VERGEN_GIT_DESCRIBE"))]
+#[command(name = "tymnl", version = env!("TYMNL_VERSION"))]
 struct Args {
     #[arg(short, long, global = true)]
     verbose: bool,
