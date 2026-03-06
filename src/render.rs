@@ -208,8 +208,8 @@ impl World {
                 let Some(line_range) = source.lines().line_to_range(line) else {
                     break 'loc;
                 };
-                let line_text = source.text()[line_range.start..line_range.end]
-                    .trim_end_matches(|c| c == '\n' || c == '\r');
+                let line_text =
+                    source.text()[line_range.start..line_range.end].trim_end_matches(['\n', '\r']);
                 let num = (line + 1).to_string();
                 let pad = num.len();
                 output.push_str(&format!("{} |\n", " ".repeat(pad)));
@@ -278,9 +278,7 @@ impl TypstWorld for World {
     }
 
     fn file(&self, id: FileId) -> FileResult<Bytes> {
-        let path = self
-            .config_dir
-            .join(id.vpath().as_rootless_path().to_path_buf());
+        let path = self.config_dir.join(id.vpath().as_rootless_path());
         let data = std::fs::read(&path).map_err(|_| FileError::NotFound(path))?;
 
         Ok(Bytes::new(data))
@@ -349,7 +347,7 @@ fn process_1bit(pixmap: &Pixmap) -> Result<Vec<u8>, Error> {
 
     let packed = pack_1bit(img.as_raw());
 
-    Ok(save_png(&packed, img.width(), img.height(), BitDepth::One)?)
+    save_png(&packed, img.width(), img.height(), BitDepth::One)
 }
 
 fn pack_1bit(data: &[u8]) -> Vec<u8> {
@@ -373,7 +371,7 @@ fn process_2bit(pixmap: &Pixmap) -> Result<Vec<u8>, Error> {
 
     let packed = pack_2bit(img.as_raw());
 
-    Ok(save_png(&packed, img.width(), img.height(), BitDepth::Two)?)
+    save_png(&packed, img.width(), img.height(), BitDepth::Two)
 }
 
 fn pack_2bit(data: &[u8]) -> Vec<u8> {

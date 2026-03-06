@@ -67,9 +67,9 @@ impl DeviceInputs {
 }
 
 fn calculate_battery_percentage(voltage: f32) -> u8 {
-    let pct = -144.9390 * voltage * voltage * voltage + 1655.8629 * voltage * voltage
-        - 6158.8520 * voltage
-        + 7501.3202;
+    let pct = -144.93 * voltage * voltage * voltage + 1655.86 * voltage * voltage
+        - 6158.85 * voltage
+        + 7501.32;
     pct.clamp(0.0, 100.0) as u8
 }
 

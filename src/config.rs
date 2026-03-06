@@ -69,14 +69,14 @@ pub struct Playlist {
 impl Playlist {
     // Get the next screen in a particular playlist
     pub fn get_next_screen<'a>(&self, config: &'a Config, counter: usize) -> Option<&'a Screen> {
-        if self.screen.len() == 0 {
+        if self.screen.is_empty() {
             warn!("Playlist \"{}\" has no screens", self.name);
             return None;
         }
 
         let next_screen = &self.screen[counter % self.screen.len()];
 
-        if let Some(screen) = config.get_screen_by_name(&next_screen) {
+        if let Some(screen) = config.get_screen_by_name(next_screen) {
             debug!("Next screen is \"{}\"", screen.name);
             return Some(screen);
         }
@@ -214,7 +214,7 @@ impl Config {
         for screen in &mut config.screen {
             match &screen.script {
                 ScreenScript::File(p) => {
-                    let script = std::fs::read_to_string(config_dir.join(&*p))?;
+                    let script = std::fs::read_to_string(config_dir.join(p))?;
                     screen.script = ScreenScript::Cached(script);
                 }
                 ScreenScript::Inline(s) => {
