@@ -1,0 +1,9 @@
+services:
+  tymnl:
+    image: ghcr.io/allgoewer/tymnl:latest
+    restart: unless-stopped
+    ports:
+      - "3003:3003"
+    volumes:
+      - ./config:/config:ro
+    command: ["-c", "/config/tymnl.yml", "serve"]

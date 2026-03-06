@@ -1,0 +1,53 @@
+timezone: "Europe/Berlin"
+default_refresh_rate: 900  # 15 min (fallback)
+default_playlist: hello
+
+device:
+
+playlist:
+  - name: hello
+    screen:
+      - hello
+
+screen:
+  - name: hello
+    option:
+      - grayscale
+    inline: |
+      #show: render.with(
+        info: [Fortune],
+      )
+
+      #set quote(quotes: false)
+      #show quote: set text(size: 2em)
+      #show quote: set block(width: 75%)
+
+      #quote([#sys.inputs.fortune.trim()])
+    input:
+      - name: fortune
+        shell: fortune -sn 240 all | tr '\n' ' '
+
+schedule:
+  # weekday sleep
+  - days: weekdays
+    start: 00:00
+    end: 07:00
+    refresh_rate: 1800  # 30 min
+
+  # weekend sleep
+  - days: weekends
+    start: 02:00
+    end: 10:00
+    refresh_rate: 1800  # 30 min
+
+  # work days
+  - days: weekdays
+    start: 07:00
+    end: 17:00
+    refresh_rate: 600  # 10 min
+
+  # weekend
+  - days: weekends
+    start: 10:00
+    end: 02:00
+    refresh_rate: 900  # 15 min
