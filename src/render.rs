@@ -34,7 +34,6 @@ pub enum Depth {
     Bit2,
 }
 
-
 #[derive(Clone, Debug)]
 pub struct Renderer {
     book: LazyHash<FontBook>,
@@ -193,10 +192,13 @@ impl World {
                     break 'loc;
                 }
                 let Some(id) = diag.span.id() else { break 'loc };
-                let Ok(source) = self.source(id) else { break 'loc };
-                let Some(range) = source.range(diag.span) else { break 'loc };
-                let Some((line, col)) = source.lines().byte_to_line_column(range.start)
-                else {
+                let Ok(source) = self.source(id) else {
+                    break 'loc;
+                };
+                let Some(range) = source.range(diag.span) else {
+                    break 'loc;
+                };
+                let Some((line, col)) = source.lines().byte_to_line_column(range.start) else {
                     break 'loc;
                 };
 

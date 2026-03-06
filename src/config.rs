@@ -68,11 +68,7 @@ pub struct Playlist {
 
 impl Playlist {
     // Get the next screen in a particular playlist
-    pub fn get_next_screen<'a>(
-        &self,
-        config: &'a Config,
-        counter: usize,
-    ) -> Option<&'a Screen> {
+    pub fn get_next_screen<'a>(&self, config: &'a Config, counter: usize) -> Option<&'a Screen> {
         if self.screen.len() == 0 {
             warn!("Playlist \"{}\" has no screens", self.name);
             return None;
@@ -232,7 +228,10 @@ impl Config {
 
     // Get a device by its MAC address
     pub fn get_device_by_mac(&self, mac: &str) -> Option<&Device> {
-        let device = self.device.iter().find(|d| d.mac_address.eq_ignore_ascii_case(mac));
+        let device = self
+            .device
+            .iter()
+            .find(|d| d.mac_address.eq_ignore_ascii_case(mac));
         if device.is_none() {
             warn!("No device with MAC address {} found", mac);
         }
@@ -311,7 +310,10 @@ impl Config {
     pub fn get_schedule_for_time<T: TimeZone>(&self, dt: DateTime<T>) -> Option<&Schedule> {
         let weekday = dt.weekday();
         let time = NaiveTime::from_hms_opt(dt.hour(), dt.minute(), 0).unwrap_or_default();
-        let found = self.schedule.iter().find(|rule| rule.matches(weekday, time));
+        let found = self
+            .schedule
+            .iter()
+            .find(|rule| rule.matches(weekday, time));
         if found.is_none() {
             warn!("No schedule found for time {:?}", dt);
         }
@@ -344,7 +346,13 @@ impl Screen {
                     Err(e) => warn!("Input {:?} failed: {}", i.name, e),
                     Ok(_) => debug!("Input {:?} fetched ok", i.name),
                 }
-                result.map(|value| (i.name.clone(), value, i.option.contains(&InputOption::NoHash)))
+                result.map(|value| {
+                    (
+                        i.name.clone(),
+                        value,
+                        i.option.contains(&InputOption::NoHash),
+                    )
+                })
             })
             .collect()
             .await;
@@ -386,7 +394,10 @@ async fn query_url(url: impl IntoUrl) -> Result<String, Error> {
     if !status.is_success() {
         let url = response.url().to_string();
         warn!("HTTP {} from {}", status, url);
-        return Err(Error::UrlStatusCode { status: status.as_u16(), url });
+        return Err(Error::UrlStatusCode {
+            status: status.as_u16(),
+            url,
+        });
     }
 
     Ok(response.text().await?)

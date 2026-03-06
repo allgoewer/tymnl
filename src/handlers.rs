@@ -154,10 +154,7 @@ fn image_response(
 
     Json(
         DisplayResponse::new(
-            format!(
-                "{}://{}/screen/{}/{}.png",
-                protocol, hostname, mac, hash
-            ),
+            format!("{}://{}/screen/{}/{}.png", protocol, hostname, mac, hash),
             format!("{}.png", hash),
         )
         .with_refresh_rate(refresh_rate),
@@ -218,7 +215,9 @@ pub async fn error(
 
     let inputs = match next {
         NextScreen::Error { error, mut inputs } => {
-            inputs.entry("error".to_owned()).or_insert_with(|| error.to_string());
+            inputs
+                .entry("error".to_owned())
+                .or_insert_with(|| error.to_string());
             inputs
         }
         NextScreen::Image { inputs, .. } | NextScreen::Welcome { inputs } => inputs,
@@ -310,7 +309,13 @@ pub async fn screen(
         };
 
         renderer
-            .render(script, Some(inputs.clone()), DISPLAY_PPI, bit_depth, timezone)
+            .render(
+                script,
+                Some(inputs.clone()),
+                DISPLAY_PPI,
+                bit_depth,
+                timezone,
+            )
             .map_err(|e| (Error::Render(e), inputs))
     })
     .await

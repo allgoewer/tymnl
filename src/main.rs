@@ -77,12 +77,20 @@ enum Command {
 async fn main() {
     let args = Args::parse();
     let debug = if args.verbose { "debug" } else { "info" };
-    let no_timestamps = matches!(args.command, Command::Serve { no_timestamps: true, .. });
+    let no_timestamps = matches!(
+        args.command,
+        Command::Serve {
+            no_timestamps: true,
+            ..
+        }
+    );
 
     let fmt_layer = if no_timestamps {
         tracing_subscriber::fmt::layer().without_time().boxed()
     } else {
-        tracing_subscriber::fmt::layer().with_timer(LocalTime::rfc_3339()).boxed()
+        tracing_subscriber::fmt::layer()
+            .with_timer(LocalTime::rfc_3339())
+            .boxed()
     };
 
     tracing_subscriber::registry()
@@ -139,7 +147,12 @@ async fn run(command: Command, config_path: PathBuf) -> Result<(), Error> {
     Ok(())
 }
 
-async fn serve(config_path: PathBuf, host: String, port: u16, no_reload: bool) -> Result<(), Error> {
+async fn serve(
+    config_path: PathBuf,
+    host: String,
+    port: u16,
+    no_reload: bool,
+) -> Result<(), Error> {
     let (config, config_dir) = Config::load(&config_path)?;
 
     let state = Arc::new(AppState {
@@ -194,7 +207,13 @@ async fn show(config_path: PathBuf, screen: String) -> Result<(), Error> {
 
     let timezone: chrono_tz::Tz = config.timezone.parse().unwrap_or(chrono_tz::UTC);
     let then = std::time::Instant::now();
-    let png = renderer.render(screen_cfg.script()?, Some(inputs), 128.0, bit_depth, timezone)?;
+    let png = renderer.render(
+        screen_cfg.script()?,
+        Some(inputs),
+        128.0,
+        bit_depth,
+        timezone,
+    )?;
     eprintln!("Rendering took {:?}", then.elapsed());
 
     let stdout = io::stdout();
@@ -217,21 +236,18 @@ fn spawn_config_watcher(state: Arc<state::AppState>, config_path: PathBuf) {
         return;
     };
 
-    let mut debouncer = match new_debouncer(
-        std::time::Duration::from_millis(200),
-        None,
-        move |result| {
+    let mut debouncer =
+        match new_debouncer(std::time::Duration::from_millis(200), None, move |result| {
             if let Ok(events) = result {
                 let _ = tx.send(events);
             }
-        },
-    ) {
-        Ok(d) => d,
-        Err(e) => {
-            warn!("Failed to create file watcher, hot-reload disabled: {e}");
-            return;
-        }
-    };
+        }) {
+            Ok(d) => d,
+            Err(e) => {
+                warn!("Failed to create file watcher, hot-reload disabled: {e}");
+                return;
+            }
+        };
 
     if let Err(e) = debouncer.watch(&watch_dir, RecursiveMode::Recursive) {
         warn!("Failed to watch config directory, hot-reload disabled: {e}");
