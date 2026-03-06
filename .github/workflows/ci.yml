@@ -16,10 +16,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Install musl tools
+        run: sudo apt-get install -y musl-tools
+
       - name: Install Rust stable
         uses: dtolnay/rust-toolchain@stable
         with:
           components: rustfmt, clippy
+          targets: x86_64-unknown-linux-musl
 
       - name: Cache cargo
         uses: actions/cache@v4
@@ -35,13 +39,13 @@ jobs:
         run: cargo fmt --check
 
       - name: Clippy
-        run: cargo clippy -- -D warnings
+        run: cargo clippy --target x86_64-unknown-linux-musl -- -D warnings
 
       - name: Build
-        run: cargo build --release
+        run: cargo build --release --target x86_64-unknown-linux-musl
 
       - name: Upload binary artifact
         uses: actions/upload-artifact@v4
         with:
           name: tymnl
-          path: target/release/tymnl
+          path: target/x86_64-unknown-linux-musl/release/tymnl
