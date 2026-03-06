@@ -3,16 +3,6 @@ name = "tymnl"
 version = "0.1.0"
 edition = "2024"
 
-default-run = "tymnl"
-
-[[bin]]
-name = "render-test"
-path = "src/render-test.rs"
-
-[[bin]]
-name = "config-test"
-path = "src/config-test.rs"
-
 [profile.release]
 strip = true
 
