@@ -7,12 +7,22 @@ WORKDIR /app
 COPY Cargo.toml Cargo.lock build.rs ./
 COPY src ./src
 
-RUN rustup target add x86_64-unknown-linux-musl && \
-    cargo build --release --target x86_64-unknown-linux-musl --bin tymnl
+RUN cargo build --locked --release 
 
-FROM scratch
+FROM debian:trixie-slim
 
-COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
-COPY --from=builder /app/target/x86_64-unknown-linux-musl/release/tymnl /usr/local/bin/tymnl
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends gosu ca-certificates \
+    && rm -rf /var/lib/apt/lists/* \
+    && printf '#!/bin/sh\nset -e\ngroupadd -g "${PGID:-1000}" app 2>/dev/null || true\nuseradd -u "${PUID:-1000}" -g "${PGID:-1000}" -M app 2>/dev/null || true\nexec gosu app "$@"\n' > /entrypoint.sh \
+    && chmod +x /entrypoint.sh
 
-ENTRYPOINT ["/usr/local/bin/tymnl"]
+WORKDIR /app
+
+COPY --from=builder /app/target/release/tymnl /app/tymnl
+
+ENV PUID=1000
+ENV PGID=1000
+
+ENTRYPOINT ["/entrypoint.sh"]
+CMD ["/app/tymnl", "-c", "/config/tymnl.yml", "serve"]
